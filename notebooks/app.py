@@ -1,94 +1,4 @@
-# import streamlit as st
-# import pandas as pd
-# import numpy as np
-# import joblib
-
-# # -------------------------------
-# # Load models & data
-# # -------------------------------
-# @st.cache_data
-# def load_all():
-#     model1 = joblib.load("best_model_model1.pkl")
-#     model2 = joblib.load("model2_best_regressor.pkl")
-#     features_model2 = joblib.load("model2_feature_names.pkl")
-
-#     df_raw = pd.read_csv("original_dataset.csv")
-#     df_processed = pd.read_csv("df_final_features_v2.csv")
-#     df_model2 = pd.read_csv("df_model2_features_with_id.csv")  # use file with loan_id fixed
-
-#     # Merge loan_id into processed features for model1
-#     if 'loan_id' not in df_processed.columns:
-#         df_processed = pd.concat([
-#             df_raw[['loan_id']].reset_index(drop=True),
-#             df_processed.reset_index(drop=True)
-#         ], axis=1)
-#     else:
-#         df_processed = pd.merge(
-#             df_raw[['loan_id']], df_processed,
-#             left_index=True, right_index=True, how='inner'
-#         )
-
-#     return model1, model2, features_model2, df_raw, df_processed, df_model2
-
-# model1, model2, features_model2, df_raw, df_processed, df_model2 = load_all()
-
-# # -------------------------------
-# # Streamlit UI
-# # -------------------------------
-# st.title("🏦 Loan Prediction Web App")
-# st.write("Browse original dataset below and enter a Loan ID to get predictions.")
-
-# # Show original dataset
-# st.subheader("📋 Original Dataset")
-# st.dataframe(df_raw, height=300, use_container_width=True)
-
-# loan_id_input = st.text_input("🔢 Enter Loan ID", "")
-
-# if loan_id_input:
-#     if not loan_id_input.isdigit():
-#         st.error("Please enter a valid numeric Loan ID.")
-#     else:
-#         loan_id = int(loan_id_input)
-#         # Row for Model1
-#         row1 = df_processed[df_processed['loan_id'] == loan_id]
-#         if row1.empty:
-#             st.error(f"Loan ID {loan_id} not found.")
-#         else:
-#             X1 = row1[model1.feature_names_in_].apply(pd.to_numeric, errors='coerce').fillna(0)
-#             pred_status = model1.predict(X1)[0]
-#             try:
-#                 prob = model1.predict_proba(X1)[0][0]
-#             except:
-#                 prob = None
-
-#             status = {0: "✅ Approved", 1: "❌ Rejected"}.get(pred_status, "Unknown")
-#             st.subheader("🔍 Prediction Result")
-#             st.write(f"**Loan ID:** {loan_id}")
-#             st.write(f"**Status:** {status}")
-#             if prob is not None:
-#                 st.write(f"**Approval Probability:** {prob:.2%}")
-
-#             st.subheader("📄 Original Data")
-#             st.dataframe(df_raw[df_raw['loan_id'] == loan_id])
-
-#             if pred_status == 0:
-#                 row2 = df_model2[df_model2['loan_id'] == loan_id]
-#                 if row2.empty:
-#                     st.warning("Loan ID not found in Model 2 dataset.")
-#                 elif row2.shape[0] > 1:
-#                     st.warning(f"Multiple matches found for Loan ID {loan_id}. Cannot reliably predict.")
-#                 else:
-#                     X2 = row2[features_model2].apply(pd.to_numeric, errors='coerce').fillna(0)
-
-#                     # Debug print: show what features are being used
-#                     st.write("Debug: Features used for Model2 prediction:")
-#                     st.write(X2.T)  # transpose to see features vs values
-
-#                     loan_log = model2.predict(X2)[0]
-#                     loan_amount = np.expm1(loan_log)
-#                     st.subheader("💰 Predicted Loan Amount")
-#                     st.success(f"₹{loan_amount:,.2f}")
-
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -99,13 +9,22 @@ import joblib
 # -------------------------------
 @st.cache_data
 def load_all():
-    model1 = joblib.load("best_model_model1.pkl")
-    model2 = joblib.load("model2_best_regressor.pkl")
-    features_model2 = joblib.load("model2_feature_names.pkl")
+    # model1 = joblib.load("best_model_model1.pkl")
+    # model2 = joblib.load("model2_best_regressor.pkl")
+    # features_model2 = joblib.load("model2_feature_names.pkl")
 
-    df_raw = pd.read_csv("original_dataset.csv")
-    df_processed = pd.read_csv("df_final_features_v2.csv")
-    df_model2 = pd.read_csv("df_model2_features_with_id.csv")  # Corrected file
+    # df_raw = pd.read_csv("original_dataset.csv")
+    # df_processed = pd.read_csv("df_final_features_v2.csv")
+    # df_model2 = pd.read_csv("df_model2_features_with_id.csv")  # Corrected file
+    BASE_PATH = os.path.dirname(__file__)  # notebooks/
+
+    model1 = joblib.load(os.path.join(BASE_PATH, "best_model_model1.pkl"))
+    model2 = joblib.load(os.path.join(BASE_PATH, "model2_best_regressor.pkl"))
+    features_model2 = joblib.load(os.path.join(BASE_PATH, "model2_feature_names.pkl"))
+
+    df_raw = pd.read_csv(os.path.join(BASE_PATH, "original_dataset.csv"))
+    df_processed = pd.read_csv(os.path.join(BASE_PATH, "df_final_features_v2.csv"))
+    df_model2 = pd.read_csv(os.path.join(BASE_PATH, "df_model2_features_with_id.csv"))
 
     if 'loan_id' not in df_processed.columns:
         df_processed = pd.concat([
